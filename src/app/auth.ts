@@ -19,9 +19,11 @@ import { MatIconModule } from '@angular/material/icon';
               Configuration Supabase manquante
             </div>
             <p class="text-xs text-amber-700 leading-relaxed">
-              Pour faire fonctionner cette application, vous devez configurer les variables 
-              <strong>SUPABASE_URL</strong> et <strong>SUPABASE_ANON_KEY</strong> dans le panneau 
-              <strong>Secrets</strong> d'AI Studio.
+              Veuillez configurer les variables <strong>SUPABASE_URL</strong> et <strong>SUPABASE_ANON_KEY</strong>.
+              <br><br>
+              • Sur <strong>AI Studio</strong> : panneau Secrets.
+              <br>
+              • Sur <strong>Vercel</strong> : Environment Variables dans le Dashboard.
             </p>
           </div>
         }

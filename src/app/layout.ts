@@ -30,7 +30,7 @@ import { MatIconModule } from '@angular/material/icon';
                 Configuration requise
               </div>
               <p class="text-[10px] text-amber-700 leading-relaxed">
-                Veuillez configurer <strong>SUPABASE_URL</strong> et <strong>SUPABASE_ANON_KEY</strong> dans le panneau <strong>Secrets</strong>.
+                Configurez <strong>SUPABASE_URL</strong> et <strong>SUPABASE_ANON_KEY</strong> (Secrets AI Studio ou Env Vars Vercel).
               </p>
             </div>
           }
