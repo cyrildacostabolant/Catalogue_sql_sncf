@@ -1,5 +1,5 @@
 {
-  "name": "SQL Query Catalog",
+  "name": "Catalogue de requêtes SQL",
   "description": "Catalogue de requêtes SQL collaboratif avec gestion dynamique de champs et accès contrôlé par Supabase.",
   "requestFramePermissions": []
 }

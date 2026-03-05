@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
             <mat-icon>database</mat-icon>
           </div>
           <div>
-            <h1 class="font-bold text-slate-900 leading-tight">SQL Catalog</h1>
+            <h1 class="font-bold text-slate-900 leading-tight">Catalogue de requêtes SQL</h1>
             <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">SNCF ERP Achats</span>
           </div>
         </div>

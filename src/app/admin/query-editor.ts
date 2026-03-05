@@ -306,9 +306,10 @@ export class AdminQueryEditorComponent implements OnInit {
       }
 
       this.router.navigate(['/admin/queries']);
-    } catch (e: any) {
-      console.error('Erreur lors de la sauvegarde:', e);
-      alert(`Erreur lors de la sauvegarde: ${e.message || 'Erreur inconnue'}`);
+    } catch (e: unknown) {
+      const error = e as Error;
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert(`Erreur lors de la sauvegarde: ${error.message || 'Erreur inconnue'}`);
     } finally {
       this.loading.set(false);
     }

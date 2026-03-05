@@ -79,8 +79,9 @@ export class AdminQueriesComponent implements OnInit {
       }
       
       if (data) this.queries.set(data as unknown as Query[]);
-    } catch (e: any) {
-      console.error('Erreur critique:', e);
+    } catch (e: unknown) {
+      const error = e as Error;
+      console.error('Erreur critique:', error);
     }
   }
 

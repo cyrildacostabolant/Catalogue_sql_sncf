@@ -22,7 +22,9 @@ export class SupabaseService {
         const globalWin = (typeof window !== 'undefined' ? window : {}) as Record<string, unknown>;
         url = url || (globalWin['SUPABASE_URL'] as string) || '';
         key = key || (globalWin['SUPABASE_ANON_KEY'] as string) || '';
-      } catch { }
+      } catch (e) {
+        console.warn('Could not access global window variables', e);
+      }
     }
     
     if (!url || !key) {
