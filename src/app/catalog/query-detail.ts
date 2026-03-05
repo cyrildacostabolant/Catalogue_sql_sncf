@@ -42,7 +42,9 @@ import { Query, DynamicField } from '../types';
               @for (field of query()?.dynamic_fields; track field.id) {
                 <div>
                   <label [for]="field.tag" class="block text-sm font-bold text-slate-700 mb-1">{{ field.label }}</label>
-                  <input [id]="field.tag" type="text" [(ngModel)]="fieldValues[field.tag]" 
+                  <input [id]="field.tag" type="text" 
+                    [ngModel]="fieldValues()[field.tag]" 
+                    (ngModelChange)="updateValue(field.tag, $event)"
                     class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all"
                     [placeholder]="field.placeholder || 'Saisir une valeur...'">
                 </div>
@@ -91,15 +93,16 @@ export class QueryDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   query = signal<Query | null>(null);
-  fieldValues: Record<string, string> = {};
+  fieldValues = signal<Record<string, string>>({});
   copied = signal(false);
 
   liveSql = computed(() => {
     const q = this.query();
+    const values = this.fieldValues();
     if (!q) return '';
     
     let sql = q.sql_content;
-    Object.entries(this.fieldValues).forEach(([tag, value]) => {
+    Object.entries(values).forEach(([tag, value]) => {
       if (value) {
         const regex = new RegExp(`\\{\\{${tag}\\}\\}`, 'g');
         sql = sql.replace(regex, value);
@@ -123,10 +126,16 @@ export class QueryDetailComponent implements OnInit {
     if (data) {
       this.query.set(data as unknown as Query);
       // Initialize field values
+      const initialValues: Record<string, string> = {};
       data.dynamic_fields.forEach((f: DynamicField) => {
-        this.fieldValues[f.tag] = '';
+        initialValues[f.tag] = '';
       });
+      this.fieldValues.set(initialValues);
     }
+  }
+
+  updateValue(tag: string, value: string) {
+    this.fieldValues.update(prev => ({ ...prev, [tag]: value }));
   }
 
   copyToClipboard() {
