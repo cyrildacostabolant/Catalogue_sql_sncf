@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { SupabaseService } from './supabase';
@@ -48,9 +48,14 @@ import { MatIconModule } from '@angular/material/icon';
               <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Administration</div>
               
               <a routerLink="/admin/users" routerLinkActive="bg-blue-50 text-primary" 
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium">
-                <mat-icon class="text-xl">people</mat-icon>
-                Utilisateurs
+                class="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium">
+                <div class="flex items-center gap-3">
+                  <mat-icon class="text-xl">people</mat-icon>
+                  Utilisateurs
+                </div>
+                @if (pendingCount() > 0) {
+                  <span class="bg-accent text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">{{ pendingCount() }}</span>
+                }
               </a>
               
               <a routerLink="/admin/categories" routerLinkActive="bg-blue-50 text-primary" 
@@ -92,9 +97,15 @@ import { MatIconModule } from '@angular/material/icon';
               <mat-icon class="text-6xl text-accent mb-4">hourglass_empty</mat-icon>
               <h2 class="text-2xl font-bold text-slate-900 mb-2">Compte en attente</h2>
               <p class="text-slate-600">Votre compte doit être validé par un administrateur avant de pouvoir accéder au catalogue.</p>
-              <button (click)="logout()" class="mt-6 px-6 py-2 bg-slate-200 text-slate-700 rounded-lg font-bold hover:bg-slate-300 transition-all">
-                Se déconnecter
-              </button>
+              <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+                <button (click)="checkStatus()" class="px-6 py-2 bg-primary text-white rounded-lg font-bold hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
+                  <mat-icon class="text-sm">refresh</mat-icon>
+                  Vérifier mon statut
+                </button>
+                <button (click)="logout()" class="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg font-bold hover:bg-slate-300 transition-all">
+                  Se déconnecter
+                </button>
+              </div>
             </div>
           </div>
         }
@@ -110,6 +121,36 @@ export class LayoutComponent {
   profile = this.supabase.profile;
   isConfigured = this.supabase.isConfigured;
   isAdmin = computed(() => this.profile()?.is_admin === true);
+  pendingCount = signal(0);
+
+  constructor() {
+    this.loadPendingCount();
+    // Refresh every 30 seconds if admin
+    setInterval(() => {
+      if (this.isAdmin()) {
+        this.loadPendingCount();
+      }
+    }, 30000);
+  }
+
+  async checkStatus() {
+    const user = this.supabase.user();
+    if (user) {
+      await this.supabase.getProfile(user.id);
+    }
+  }
+
+  async loadPendingCount() {
+    if (!this.isAdmin()) return;
+    const { count } = await this.supabase.client
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'PENDING');
+    
+    if (count !== null) {
+      this.pendingCount.set(count);
+    }
+  }
 
   async logout() {
     await this.supabase.signOut();
