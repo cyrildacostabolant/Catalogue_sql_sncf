@@ -16,8 +16,13 @@ import { Category, SubCategory } from '../types';
           <h1 class="text-3xl font-bold text-slate-900">Gestion des Catégories</h1>
           <p class="text-slate-500">Organisez votre catalogue par thématiques et sous-thématiques.</p>
         </div>
-        <button (click)="addCategory()" class="px-4 py-2 bg-primary text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:bg-blue-600 transition-all">
-          <mat-icon>add</mat-icon> Nouvelle Catégorie
+        <button (click)="addCategory()" [disabled]="isAdding()"
+          class="px-4 py-2 bg-primary text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:bg-blue-600 disabled:opacity-50 transition-all min-w-[180px] justify-center">
+          @if (isAdding()) {
+            <div class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          } @else {
+            <mat-icon>add</mat-icon> Nouvelle Catégorie
+          }
         </button>
       </div>
 
@@ -59,46 +64,103 @@ import { Category, SubCategory } from '../types';
 export class AdminCategoriesComponent implements OnInit {
   private supabase = inject(SupabaseService);
   categories = signal<Category[]>([]);
+  isAdding = signal(false);
 
   ngOnInit() {
     this.loadCategories();
   }
 
   async loadCategories() {
-    const { data } = await this.supabase.client
-      .from('categories')
-      .select('*, sub_categories(*)');
-    if (data) this.categories.set(data);
+    try {
+      const { data, error } = await this.supabase.client
+        .from('categories')
+        .select('*, sub_categories(*)');
+      
+      if (error) {
+        console.error('Erreur Supabase (load):', error);
+        if (error.code === 'PGRST200') {
+          alert('Erreur: La relation "sub_categories" n\'est pas trouvée. Vérifiez que la table existe et que la clé étrangère est correcte.');
+        }
+        return;
+      }
+      if (data) this.categories.set(data);
+    } catch (e) {
+      console.error('Erreur lors du chargement des catégories:', e);
+    }
   }
 
   async addCategory() {
-    const { data } = await this.supabase.client
-      .from('categories')
-      .insert({ name: 'Nouvelle Catégorie' })
-      .select()
-      .single();
-    if (data) this.loadCategories();
+    if (this.isAdding()) return;
+    this.isAdding.set(true);
+    
+    try {
+      const { data, error } = await this.supabase.client
+        .from('categories')
+        .insert({ 
+          name: 'Nouvelle Catégorie',
+          color_code: '#3B82F6'
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erreur Supabase (insert):', error);
+        if (error.code === '42703') {
+          alert('Erreur: La colonne "color_code" semble manquer dans la table "categories".');
+        } else {
+          alert(`Erreur Supabase: ${error.message} (${error.code})`);
+        }
+        return;
+      }
+      
+      if (data) {
+        await this.loadCategories();
+      }
+    } catch (e) {
+      console.error('Erreur lors de la création de la catégorie:', e);
+      alert('Erreur critique lors de la création de la catégorie.');
+    } finally {
+      this.isAdding.set(false);
+    }
   }
 
   async updateCategory(cat: Category) {
-    await this.supabase.client
-      .from('categories')
-      .update({ name: cat.name, color_code: cat.color_code })
-      .eq('id', cat.id);
+    try {
+      const { error } = await this.supabase.client
+        .from('categories')
+        .update({ name: cat.name, color_code: cat.color_code })
+        .eq('id', cat.id);
+      if (error) throw error;
+    } catch (e) {
+      console.error('Erreur lors de la mise à jour de la catégorie:', e);
+    }
   }
 
   async deleteCategory(cat: Category) {
     if (confirm('Supprimer cette catégorie et toutes ses sous-catégories ?')) {
-      await this.supabase.client.from('categories').delete().eq('id', cat.id);
-      this.loadCategories();
+      try {
+        const { error } = await this.supabase.client.from('categories').delete().eq('id', cat.id);
+        if (error) throw error;
+        await this.loadCategories();
+      } catch (e) {
+        console.error('Erreur lors de la suppression de la catégorie:', e);
+        alert('Impossible de supprimer la catégorie. Vérifiez les dépendances (requêtes SQL liées).');
+      }
     }
   }
 
   async addSubCategory(cat: Category) {
-    await this.supabase.client
-      .from('sub_categories')
-      .insert({ name: 'Nouvelle sous-catégorie', category_id: cat.id });
-    this.loadCategories();
+    try {
+      const { error } = await this.supabase.client
+        .from('sub_categories')
+        .insert({ name: 'Nouvelle sous-catégorie', category_id: cat.id });
+      
+      if (error) throw error;
+      await this.loadCategories();
+    } catch (e) {
+      console.error('Erreur lors de la création de la sous-catégorie:', e);
+      alert('Erreur lors de la création de la sous-catégorie.');
+    }
   }
 
   async updateSubCategory(sub: SubCategory) {

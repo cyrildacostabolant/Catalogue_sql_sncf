@@ -66,11 +66,22 @@ export class AdminQueriesComponent implements OnInit {
   }
 
   async loadQueries() {
-    const { data } = await this.supabase.client
-      .from('queries')
-      .select('*, sub_categories(name, categories(name))')
-      .order('created_at', { ascending: false });
-    if (data) this.queries.set(data as unknown as Query[]);
+    try {
+      const { data, error } = await this.supabase.client
+        .from('queries')
+        .select('*, sub_categories(name, categories(name))')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Erreur lors du chargement des requêtes:', error);
+        alert(`Erreur lors du chargement des requêtes: ${error.message}`);
+        return;
+      }
+      
+      if (data) this.queries.set(data as unknown as Query[]);
+    } catch (e: any) {
+      console.error('Erreur critique:', e);
+    }
   }
 
   async deleteQuery(query: Query) {

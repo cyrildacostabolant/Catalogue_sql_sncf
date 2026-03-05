@@ -19,19 +19,27 @@ import { Category, Query, SubCategory } from '../types';
           <div class="space-y-4">
             @for (cat of categories(); track cat.id) {
               <div>
-                <div class="flex items-center gap-2 px-2 py-1 mb-1">
-                  <div class="w-2 h-2 rounded-full" [style.backgroundColor]="cat.color_code"></div>
-                  <span class="text-sm font-bold text-slate-700">{{ cat.name }}</span>
-                </div>
-                <div class="ml-4 space-y-1 border-l-2 border-slate-200 pl-3">
-                  @for (sub of cat.sub_categories || []; track sub.id) {
-                    <button (click)="selectSubCategory(sub)" 
-                      [class]="selectedSubId() === sub.id ? 'text-primary font-bold' : 'text-slate-500 hover:text-slate-900'"
-                      class="block w-full text-left text-xs py-1 transition-all">
-                      {{ sub.name }}
-                    </button>
-                  }
-                </div>
+                <button (click)="toggleCategory(cat.id)" 
+                  class="flex items-center justify-between w-full px-2 py-1 mb-1 hover:bg-slate-100 rounded-lg transition-all group">
+                  <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full" [style.backgroundColor]="cat.color_code"></div>
+                    <span class="text-sm font-bold text-slate-700">{{ cat.name }}</span>
+                  </div>
+                  <mat-icon class="text-slate-400 text-sm transition-transform" 
+                    [class.rotate-90]="isExpanded(cat.id)">chevron_right</mat-icon>
+                </button>
+                
+                @if (isExpanded(cat.id)) {
+                  <div class="ml-4 space-y-1 border-l-2 border-slate-200 pl-3 animate-in fade-in slide-in-from-left-2 duration-200">
+                    @for (sub of cat.sub_categories || []; track sub.id) {
+                      <button (click)="selectSubCategory(sub)" 
+                        [class]="selectedSubId() === sub.id ? 'text-primary font-bold bg-blue-50' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'"
+                        class="block w-full text-left text-xs py-1.5 px-2 rounded-md transition-all">
+                        {{ sub.name }}
+                      </button>
+                    }
+                  </div>
+                }
               </div>
             }
           </div>
@@ -82,6 +90,7 @@ export class CatalogComponent implements OnInit {
   queries = signal<Query[]>([]);
   selectedSubId = signal<string | null>(null);
   selectedSubName = signal<string>('');
+  expandedCategories = signal<Set<string>>(new Set());
 
   profile = this.supabase.profile;
 
@@ -111,6 +120,20 @@ export class CatalogComponent implements OnInit {
       .select('*')
       .order('title');
     if (qs) this.queries.set(qs);
+  }
+
+  toggleCategory(id: string) {
+    const expanded = new Set(this.expandedCategories());
+    if (expanded.has(id)) {
+      expanded.delete(id);
+    } else {
+      expanded.add(id);
+    }
+    this.expandedCategories.set(expanded);
+  }
+
+  isExpanded(id: string) {
+    return this.expandedCategories().has(id);
   }
 
   selectSubCategory(sub: SubCategory) {

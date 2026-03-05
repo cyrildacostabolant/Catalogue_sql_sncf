@@ -58,9 +58,18 @@ import { Category, SubCategory, DynamicField } from '../types';
           <div class="bg-slate-900 p-6 rounded-2xl shadow-xl border border-slate-800">
             <div class="flex items-center justify-between mb-4">
               <label for="sql_content" class="text-sm font-bold text-slate-400 uppercase tracking-widest">Code SQL Brut</label>
-              <span class="text-[10px] text-slate-500 italic">Utilisez {{ '{{' }}tag{{ '}}' }} pour les variables</span>
+              <div class="flex gap-2">
+                @for (field of dynamicFields.value; track $index) {
+                  @if (field.tag) {
+                    <button type="button" (click)="insertTag(field.tag)" 
+                      class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[10px] font-mono rounded border border-slate-700 transition-all">
+                      + {{ '{{' }}{{ field.tag }}{{ '}}' }}
+                    </button>
+                  }
+                }
+              </div>
             </div>
-            <textarea id="sql_content" formControlName="sql_content" rows="12"
+            <textarea id="sql_content" #sqlEditor formControlName="sql_content" rows="12"
               class="w-full bg-transparent text-emerald-400 font-mono text-sm outline-none resize-none"
               placeholder="SELECT * FROM table WHERE user = {{ '{{' }}user_id{{ '}}' }}"></textarea>
           </div>
@@ -151,6 +160,25 @@ export class AdminQueryEditorComponent implements OnInit {
 
   get dynamicFields() {
     return this.queryForm.get('dynamic_fields') as FormArray;
+  }
+
+  insertTag(tag: string) {
+    const textarea = document.getElementById('sql_content') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const tagToInsert = `{{${tag}}}`;
+    
+    const newValue = text.substring(0, start) + tagToInsert + text.substring(end);
+    this.queryForm.patchValue({ sql_content: newValue });
+    
+    // Reset focus and cursor position
+    setTimeout(() => {
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = start + tagToInsert.length;
+    });
   }
 
   ngOnInit() {
@@ -248,31 +276,39 @@ export class AdminQueryEditorComponent implements OnInit {
       let queryId = this.route.snapshot.params['id'];
 
       if (this.isEdit) {
-        await this.supabase.client
+        const { error: updateError } = await this.supabase.client
           .from('queries')
           .update({ title, sql_content, sub_category_id, allowed_groups: this.allowedGroups })
           .eq('id', queryId);
         
+        if (updateError) throw updateError;
+
         // Simple way: delete and recreate fields
-        await this.supabase.client.from('dynamic_fields').delete().eq('query_id', queryId);
+        const { error: deleteError } = await this.supabase.client.from('dynamic_fields').delete().eq('query_id', queryId);
+        if (deleteError) throw deleteError;
       } else {
-        const { data } = await this.supabase.client
+        const { data, error: insertError } = await this.supabase.client
           .from('queries')
           .insert({ title, sql_content, sub_category_id, allowed_groups: this.allowedGroups })
           .select()
           .single();
+        
+        if (insertError) throw insertError;
         if (data) queryId = data.id;
       }
 
       if (fields.length > 0 && queryId) {
-        await this.supabase.client
+        const { error: fieldsError } = await this.supabase.client
           .from('dynamic_fields')
           .insert(fields.map((f: Partial<DynamicField>, i: number) => ({ ...f, query_id: queryId, order_index: i })));
+        
+        if (fieldsError) throw fieldsError;
       }
 
       this.router.navigate(['/admin/queries']);
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      console.error('Erreur lors de la sauvegarde:', e);
+      alert(`Erreur lors de la sauvegarde: ${e.message || 'Erreur inconnue'}`);
     } finally {
       this.loading.set(false);
     }
