@@ -80,7 +80,13 @@ import { MatIconModule } from '@angular/material/icon';
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-sm font-bold text-slate-900 truncate">{{ profile()?.full_name || 'Utilisateur' }}</p>
-              <p class="text-[10px] text-slate-500 truncate">{{ profile()?.user_group || 'En attente' }}</p>
+              <p class="text-[10px] text-slate-500 truncate">
+                @if (isAdmin()) {
+                  Administrateur
+                } @else {
+                  {{ profile()?.user_group || (profile()?.status === 'APPROVED' ? 'Consultant' : 'En attente') }}
+                }
+              </p>
             </div>
             <button (click)="logout()" class="text-slate-400 hover:text-danger transition-colors">
               <mat-icon>logout</mat-icon>
