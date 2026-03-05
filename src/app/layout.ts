@@ -13,8 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
       <!-- Sidebar -->
       <aside class="w-72 bg-white border-r border-slate-200 flex flex-col shadow-sm z-20">
         <div class="p-6 border-b border-slate-100 flex items-center gap-3">
-          <div class="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg">
-            <mat-icon>database</mat-icon>
+          <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shadow-sm overflow-hidden border border-blue-100">
+            <img src="https://cdn-icons-png.flaticon.com/512/2721/2721262.png" alt="SQL Logo" class="w-7 h-7 object-contain" referrerpolicy="no-referrer">
           </div>
           <div>
             <h1 class="font-bold text-slate-900 leading-tight">Catalogue de requêtes SQL</h1>
