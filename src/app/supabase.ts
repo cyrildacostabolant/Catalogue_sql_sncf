@@ -37,6 +37,7 @@ export class SupabaseService {
     this.supabase = createClient(url, key);
 
     this.supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth State Change:', _event, session?.user?.email);
       this.user.set(session?.user ?? null);
       if (session?.user) {
         this.getProfile(session.user.id);
@@ -51,14 +52,22 @@ export class SupabaseService {
   }
 
   async getProfile(userId: string) {
+    console.log('Fetching profile for:', userId);
     const { data, error } = await this.supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
     
+    if (error) {
+      console.error('Error fetching profile:', error.message, error.details);
+    }
+
     if (data) {
+      console.log('Profile loaded:', data);
       this.profile.set(data);
+    } else {
+      console.warn('No profile data found for user');
     }
     return { data, error };
   }
