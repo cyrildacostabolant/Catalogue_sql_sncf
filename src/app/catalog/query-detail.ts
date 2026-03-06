@@ -150,6 +150,21 @@ export class QueryDetailComponent implements OnInit {
       .single();
     
     if (data) {
+      // Parse placeholder for config (backward compatibility or new storage strategy)
+      data.dynamic_fields.forEach((f: DynamicField) => {
+        if (f.placeholder) {
+          try {
+            const config = JSON.parse(f.placeholder);
+            if (config.required_length) f.required_length = config.required_length;
+            if (config.dropdown_options) f.dropdown_options = config.dropdown_options;
+            // Clear placeholder if it was used for config, so it doesn't show up as placeholder text
+            f.placeholder = null;
+          } catch (e) {
+            // Not JSON, keep as is (it's a real placeholder)
+          }
+        }
+      });
+
       this.query.set(data as unknown as Query);
       // Initialize field values
       const initialValues: Record<string, string> = {};

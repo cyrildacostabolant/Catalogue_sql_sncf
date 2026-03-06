@@ -249,11 +249,25 @@ export class AdminQueryEditorComponent implements OnInit {
       });
 
       data.dynamic_fields.forEach((f: DynamicField) => {
+        let required_length = f.required_length;
+        let dropdown_options = f.dropdown_options;
+
+        // Try to parse from placeholder if columns are empty (backward compatibility or new storage strategy)
+        if (!required_length && !dropdown_options && f.placeholder) {
+          try {
+            const config = JSON.parse(f.placeholder);
+            if (config.required_length) required_length = config.required_length;
+            if (config.dropdown_options) dropdown_options = config.dropdown_options;
+          } catch (e) {
+            // Not JSON, ignore
+          }
+        }
+
         this.dynamicFields.push(this.fb.group({
           label: [f.label, Validators.required],
           tag: [f.tag, Validators.required],
-          required_length: [f.required_length],
-          dropdown_options_str: [f.dropdown_options ? f.dropdown_options.join(', ') : '']
+          required_length: [required_length],
+          dropdown_options_str: [dropdown_options ? dropdown_options.join(', ') : '']
         }));
       });
     }
@@ -291,13 +305,24 @@ export class AdminQueryEditorComponent implements OnInit {
     const { title, sql_content, sub_category_id } = this.queryForm.value;
     const rawFields = this.dynamicFields.value;
     
-    // Process fields to convert string options to array
-    const fields = rawFields.map((f: { label: string; tag: string; required_length?: number; dropdown_options_str?: string }) => ({
-      label: f.label,
-      tag: f.tag,
-      required_length: f.required_length,
-      dropdown_options: f.dropdown_options_str ? f.dropdown_options_str.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0) : null
-    }));
+    // Process fields to convert string options to array and pack into placeholder
+    const fields = rawFields.map((f: { label: string; tag: string; required_length?: number; dropdown_options_str?: string }) => {
+      const dropdown_options = f.dropdown_options_str ? f.dropdown_options_str.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0) : null;
+      const required_length = f.required_length;
+      
+      // Store config in placeholder to avoid DB schema changes
+      const config = {
+        required_length,
+        dropdown_options
+      };
+      
+      return {
+        label: f.label,
+        tag: f.tag,
+        placeholder: JSON.stringify(config),
+        // We don't send required_length and dropdown_options columns as they might not exist
+      };
+    });
 
     try {
       let queryId = this.route.snapshot.params['id'];
