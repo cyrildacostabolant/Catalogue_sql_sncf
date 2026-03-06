@@ -7,11 +7,14 @@ import { AdminQueriesComponent } from './admin/queries';
 import { AdminQueryEditorComponent } from './admin/query-editor';
 import { CatalogComponent } from './catalog/catalog';
 import { QueryDetailComponent } from './catalog/query-detail';
+import { authGuard } from './auth.guard';
+
 export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   {
     path: '',
     component: LayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'catalog', pathMatch: 'full' },
       { path: 'catalog', component: CatalogComponent },
