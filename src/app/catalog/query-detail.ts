@@ -41,12 +41,38 @@ import { Query, DynamicField } from '../types';
             <div class="space-y-4">
               @for (field of query()?.dynamic_fields; track field.id) {
                 <div>
-                  <label [for]="field.tag" class="block text-sm font-bold text-slate-700 mb-1">{{ field.label }}</label>
-                  <input [id]="field.tag" type="text" 
-                    [ngModel]="fieldValues()[field.tag]" 
-                    (ngModelChange)="updateValue(field.tag, $event)"
-                    class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all"
-                    [placeholder]="field.placeholder || 'Saisir une valeur...'">
+                  <label [for]="field.tag" class="block text-sm font-bold text-slate-700 mb-1">
+                    {{ field.label }}
+                    @if (field.required_length) {
+                      <span class="text-xs font-normal text-slate-400 ml-1">({{ field.required_length }} chars)</span>
+                    }
+                  </label>
+                  
+                  @if (field.dropdown_options && field.dropdown_options.length > 0) {
+                    <select [id]="field.tag" 
+                      [ngModel]="fieldValues()[field.tag]" 
+                      (ngModelChange)="updateValue(field.tag, $event)"
+                      class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all cursor-pointer">
+                      <option value="">Sélectionner...</option>
+                      @for (opt of field.dropdown_options; track opt) {
+                        <option [value]="opt">{{ opt }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <input [id]="field.tag" type="text" 
+                      [ngModel]="fieldValues()[field.tag]" 
+                      (ngModelChange)="updateValue(field.tag, $event)"
+                      [maxlength]="field.required_length || 500"
+                      class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary outline-none transition-all"
+                      [class.border-red-300]="field.required_length && (fieldValues()[field.tag]?.length || 0) !== field.required_length && (fieldValues()[field.tag]?.length || 0) > 0"
+                      [placeholder]="field.placeholder || 'Saisir une valeur...'">
+                    
+                    @if (field.required_length && (fieldValues()[field.tag]?.length || 0) !== field.required_length && (fieldValues()[field.tag]?.length || 0) > 0) {
+                      <p class="text-xs text-red-500 mt-1">
+                        Ce champ doit contenir exactement {{ field.required_length }} caractères (actuel: {{ fieldValues()[field.tag]?.length || 0 }}).
+                      </p>
+                    }
+                  }
                 </div>
               } @empty {
                 <p class="text-sm text-slate-400 italic">Aucun paramètre dynamique pour cette requête.</p>

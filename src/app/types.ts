@@ -46,4 +46,6 @@ export interface DynamicField {
   tag: string;
   placeholder: string | null;
   order_index: number;
+  required_length?: number | null;
+  dropdown_options?: string[] | null;
 }

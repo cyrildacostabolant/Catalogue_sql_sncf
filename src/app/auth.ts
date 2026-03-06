@@ -28,7 +28,12 @@ import { MatIconModule } from '@angular/material/icon';
           </div>
         }
 
-        <div class="text-center mb-8">
+        <div class="text-center mb-8 relative">
+          @if (session()) {
+            <button (click)="logout()" class="absolute top-0 right-0 p-2 text-slate-400 hover:text-danger transition-colors" title="Se déconnecter">
+              <mat-icon>logout</mat-icon>
+            </button>
+          }
           <div class="inline-flex items-center justify-center w-16 height-16 bg-primary text-white rounded-2xl mb-4 shadow-lg">
             <mat-icon class="text-3xl">database</mat-icon>
           </div>
@@ -106,6 +111,7 @@ export class AuthComponent {
   error = signal<string | null>(null);
   message = signal<string | null>(null);
   isConfigured = this.supabase.isConfigured;
+  session = this.supabase.user;
 
   authForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -115,6 +121,13 @@ export class AuthComponent {
 
   toggleMode() {
     this.isLogin.update(v => !v);
+    this.error.set(null);
+    this.message.set(null);
+  }
+
+  async logout() {
+    await this.supabase.client.auth.signOut();
+    this.isLogin.set(true);
     this.error.set(null);
     this.message.set(null);
   }
