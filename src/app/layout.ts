@@ -11,14 +11,14 @@ import { MatIconModule } from '@angular/material/icon';
   template: `
     <div class="flex h-screen bg-slate-50 overflow-hidden">
       <!-- Sidebar -->
-      <aside class="w-72 bg-white border-r border-slate-200 flex flex-col shadow-sm z-20">
-        <div class="p-6 border-b border-slate-100 flex items-center gap-3">
-          <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shadow-sm overflow-hidden border border-blue-100">
+      <aside class="w-72 bg-blue-50 border-r border-blue-100 flex flex-col shadow-sm z-20">
+        <div class="p-6 border-b border-blue-100 flex items-center gap-3">
+          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm overflow-hidden border border-blue-100">
             <img src="https://cdn-icons-png.flaticon.com/512/2721/2721262.png" alt="SQL Logo" class="w-7 h-7 object-contain" referrerpolicy="no-referrer">
           </div>
           <div>
             <h1 class="font-bold text-slate-900 leading-tight">Catalogue de requêtes SQL</h1>
-            <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">SNCF ERP Achats</span>
+            <span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">SNCF ERP Achats</span>
           </div>
         </div>
 
@@ -35,20 +35,20 @@ import { MatIconModule } from '@angular/material/icon';
             </div>
           }
 
-          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Menu Principal</div>
+          <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2">Menu Principal</div>
           
-          <a routerLink="/catalog" routerLinkActive="bg-blue-50 text-primary" 
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium">
+          <a routerLink="/catalog" routerLinkActive="bg-white text-primary shadow-sm" 
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-white/50 transition-all font-medium">
             <mat-icon class="text-xl">search</mat-icon>
             Catalogue
           </a>
 
           @if (isAdmin()) {
             <div class="pt-6 pb-2">
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Administration</div>
+              <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2">Administration</div>
               
-              <a routerLink="/admin/users" routerLinkActive="bg-blue-50 text-primary" 
-                class="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium">
+              <a routerLink="/admin/users" routerLinkActive="bg-white text-primary shadow-sm" 
+                class="flex items-center justify-between px-3 py-2.5 rounded-xl text-slate-600 hover:bg-white/50 transition-all font-medium">
                 <div class="flex items-center gap-3">
                   <mat-icon class="text-xl">people</mat-icon>
                   Utilisateurs
@@ -58,14 +58,14 @@ import { MatIconModule } from '@angular/material/icon';
                 }
               </a>
               
-              <a routerLink="/admin/categories" routerLinkActive="bg-blue-50 text-primary" 
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium">
+              <a routerLink="/admin/categories" routerLinkActive="bg-white text-primary shadow-sm" 
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-white/50 transition-all font-medium">
                 <mat-icon class="text-xl">category</mat-icon>
                 Catégories
               </a>
 
-              <a routerLink="/admin/queries" routerLinkActive="bg-blue-50 text-primary" 
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-medium">
+              <a routerLink="/admin/queries" routerLinkActive="bg-white text-primary shadow-sm" 
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-white/50 transition-all font-medium">
                 <mat-icon class="text-xl">code</mat-icon>
                 Requêtes SQL
               </a>
@@ -73,9 +73,9 @@ import { MatIconModule } from '@angular/material/icon';
           }
         </nav>
 
-        <div class="p-4 border-t border-slate-100">
-          <div class="bg-slate-50 rounded-2xl p-4 flex items-center gap-3">
-            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 font-bold">
+        <div class="p-4 border-t border-blue-100">
+          <div class="bg-white rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+            <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-primary font-bold">
               {{ profile()?.full_name?.charAt(0) || 'U' }}
             </div>
             <div class="flex-1 min-w-0">
@@ -96,26 +96,31 @@ import { MatIconModule } from '@angular/material/icon';
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 overflow-y-auto relative">
-        @if (profile()?.status === 'PENDING') {
-          <div class="absolute inset-0 z-50 bg-white/90 backdrop-blur-sm flex items-center justify-center p-8 text-center">
-            <div class="max-w-md">
-              <mat-icon class="text-6xl text-accent mb-4">hourglass_empty</mat-icon>
-              <h2 class="text-2xl font-bold text-slate-900 mb-2">Compte en attente</h2>
-              <p class="text-slate-600">Votre compte doit être validé par un administrateur avant de pouvoir accéder au catalogue.</p>
-              <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-                <button (click)="checkStatus()" class="px-6 py-2 bg-primary text-white rounded-lg font-bold hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
-                  <mat-icon class="text-sm">refresh</mat-icon>
-                  Vérifier mon statut
-                </button>
-                <button (click)="logout()" class="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg font-bold hover:bg-slate-300 transition-all">
-                  Se déconnecter
-                </button>
+      <main class="flex-1 overflow-y-auto relative bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url('/fond.png');">
+        <!-- Overlay to ensure content remains readable if the background image is too busy -->
+        <div class="absolute inset-0 bg-white/80 backdrop-blur-[2px] z-0"></div>
+        
+        <div class="relative z-10 min-h-full">
+          @if (profile()?.status === 'PENDING') {
+            <div class="absolute inset-0 z-50 bg-white/90 backdrop-blur-sm flex items-center justify-center p-8 text-center">
+              <div class="max-w-md">
+                <mat-icon class="text-6xl text-accent mb-4">hourglass_empty</mat-icon>
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Compte en attente</h2>
+                <p class="text-slate-600">Votre compte doit être validé par un administrateur avant de pouvoir accéder au catalogue.</p>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+                  <button (click)="checkStatus()" class="px-6 py-2 bg-primary text-white rounded-lg font-bold hover:bg-blue-600 transition-all flex items-center justify-center gap-2">
+                    <mat-icon class="text-sm">refresh</mat-icon>
+                    Vérifier mon statut
+                  </button>
+                  <button (click)="logout()" class="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg font-bold hover:bg-slate-300 transition-all">
+                    Se déconnecter
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        }
-        <router-outlet></router-outlet>
+          }
+          <router-outlet></router-outlet>
+        </div>
       </main>
     </div>
   `
