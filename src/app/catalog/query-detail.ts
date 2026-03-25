@@ -157,9 +157,10 @@ export class QueryDetailComponent implements OnInit {
             const config = JSON.parse(f.placeholder);
             if (config.required_length) f.required_length = config.required_length;
             if (config.dropdown_options) f.dropdown_options = config.dropdown_options;
+            if (config.default_value) f.default_value = config.default_value;
             // Clear placeholder if it was used for config, so it doesn't show up as placeholder text
             f.placeholder = null;
-          } catch (e) {
+          } catch {
             // Not JSON, keep as is (it's a real placeholder)
           }
         }
@@ -169,7 +170,7 @@ export class QueryDetailComponent implements OnInit {
       // Initialize field values
       const initialValues: Record<string, string> = {};
       data.dynamic_fields.forEach((f: DynamicField) => {
-        initialValues[f.tag] = '';
+        initialValues[f.tag] = f.default_value || '';
       });
       this.fieldValues.set(initialValues);
     }

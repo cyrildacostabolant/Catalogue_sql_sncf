@@ -108,11 +108,16 @@ import { Category, SubCategory, DynamicField } from '../types';
                   
                   <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/50">
                     <div>
+                      <label [for]="'default-' + i" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Valeur par défaut (optionnel)</label>
+                      <input [id]="'default-' + i" type="text" formControlName="default_value" placeholder="ex: 12345"
+                        class="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm outline-none">
+                    </div>
+                    <div>
                       <label [for]="'length-' + i" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Longueur requise (optionnel)</label>
                       <input [id]="'length-' + i" type="number" formControlName="required_length" placeholder="ex: 10"
                         class="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm outline-none">
                     </div>
-                    <div>
+                    <div class="col-span-2">
                       <label [for]="'options-' + i" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Options (séparées par virgule)</label>
                       <input [id]="'options-' + i" type="text" formControlName="dropdown_options_str" placeholder="ex: Option 1, Option 2"
                         class="w-full px-3 py-1.5 rounded-lg border border-slate-200 text-sm outline-none">
@@ -251,14 +256,16 @@ export class AdminQueryEditorComponent implements OnInit {
       data.dynamic_fields.forEach((f: DynamicField) => {
         let required_length = f.required_length;
         let dropdown_options = f.dropdown_options;
+        let default_value = f.default_value;
 
         // Try to parse from placeholder if columns are empty (backward compatibility or new storage strategy)
-        if (!required_length && !dropdown_options && f.placeholder) {
+        if (!required_length && !dropdown_options && !default_value && f.placeholder) {
           try {
             const config = JSON.parse(f.placeholder);
             if (config.required_length) required_length = config.required_length;
             if (config.dropdown_options) dropdown_options = config.dropdown_options;
-          } catch (e) {
+            if (config.default_value) default_value = config.default_value;
+          } catch {
             // Not JSON, ignore
           }
         }
@@ -267,7 +274,8 @@ export class AdminQueryEditorComponent implements OnInit {
           label: [f.label, Validators.required],
           tag: [f.tag, Validators.required],
           required_length: [required_length],
-          dropdown_options_str: [dropdown_options ? dropdown_options.join(', ') : '']
+          dropdown_options_str: [dropdown_options ? dropdown_options.join(', ') : ''],
+          default_value: [default_value]
         }));
       });
     }
@@ -278,7 +286,8 @@ export class AdminQueryEditorComponent implements OnInit {
       label: ['', Validators.required],
       tag: ['', Validators.required],
       required_length: [null],
-      dropdown_options_str: ['']
+      dropdown_options_str: [''],
+      default_value: ['']
     }));
   }
 
@@ -306,14 +315,16 @@ export class AdminQueryEditorComponent implements OnInit {
     const rawFields = this.dynamicFields.value;
     
     // Process fields to convert string options to array and pack into placeholder
-    const fields = rawFields.map((f: { label: string; tag: string; required_length?: number; dropdown_options_str?: string }) => {
+    const fields = rawFields.map((f: { label: string; tag: string; required_length?: number; dropdown_options_str?: string; default_value?: string }) => {
       const dropdown_options = f.dropdown_options_str ? f.dropdown_options_str.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0) : null;
       const required_length = f.required_length;
+      const default_value = f.default_value;
       
       // Store config in placeholder to avoid DB schema changes
       const config = {
         required_length,
-        dropdown_options
+        dropdown_options,
+        default_value
       };
       
       return {

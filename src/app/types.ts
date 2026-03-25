@@ -48,4 +48,5 @@ export interface DynamicField {
   order_index: number;
   required_length?: number | null;
   dropdown_options?: string[] | null;
+  default_value?: string | null;
 }
