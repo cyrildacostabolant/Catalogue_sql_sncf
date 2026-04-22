@@ -4,14 +4,14 @@ on:
   schedule:
     # S'exécute tous les jours à 05:00 UTC
     - cron: '0 5 * * *'
-  workflow_dispatch: # Te permet de tester manuellement dans l'onglet Actions
+  workflow_dispatch: # Pour lancer un test manuel
 
 jobs:
   ping_supabase:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Recipes Table
+      - name: Ping Categories Table
         run: |
-          curl -i -X GET "https://hovvlztgbkrgmlxwepeo.supabase.co/rest/v1/recipes?select=id&limit=1" \
+          curl --fail -i -X GET "https://hovvlztgbkrgmlxwepeo.supabase.co/rest/v1/categories?select=id&limit=1" \
           -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
