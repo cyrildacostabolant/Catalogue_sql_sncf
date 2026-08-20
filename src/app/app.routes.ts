@@ -7,6 +7,7 @@ import { AdminQueriesComponent } from './admin/queries';
 import { AdminQueryEditorComponent } from './admin/query-editor';
 import { CatalogComponent } from './catalog/catalog';
 import { QueryDetailComponent } from './catalog/query-detail';
+import { HistoryComponent } from './history/history';
 import { authGuard } from './auth.guard';
 
 export const routes: Routes = [
@@ -19,6 +20,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'catalog', pathMatch: 'full' },
       { path: 'catalog', component: CatalogComponent },
       { path: 'catalog/:id', component: QueryDetailComponent },
+      { path: 'history', component: HistoryComponent },
       { path: 'admin/users', component: AdminUsersComponent },
       { path: 'admin/categories', component: AdminCategoriesComponent },
       { path: 'admin/queries', component: AdminQueriesComponent },

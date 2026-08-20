@@ -43,6 +43,12 @@ import { MatIconModule } from '@angular/material/icon';
             Catalogue
           </a>
 
+          <a routerLink="/history" routerLinkActive="bg-white text-primary shadow-sm" 
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-white/50 transition-all font-medium">
+            <mat-icon class="text-xl">history</mat-icon>
+            Historique
+          </a>
+
           @if (isAdmin()) {
             <div class="pt-6 pb-2">
               <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2">Administration</div>

@@ -1,5 +1,6 @@
 {
   "name": "Catalogue de requêtes SQL",
-  "description": "Catalogue de requêtes SQL collaboratif avec gestion dynamique de champs et accès contrôlé par Supabase.",
-  "requestFramePermissions": []
+  "description": "Catalogue de requêtes SQL collaboratif avec gestion dynamique de champs, historique des requêtes et accès contrôlé par Supabase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

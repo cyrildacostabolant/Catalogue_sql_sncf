@@ -341,7 +341,13 @@ export class AdminQueryEditorComponent implements OnInit {
       if (this.isEdit) {
         const { error: updateError } = await this.supabase.client
           .from('queries')
-          .update({ title, sql_content, sub_category_id, allowed_groups: this.allowedGroups })
+          .update({ 
+            title, 
+            sql_content, 
+            sub_category_id, 
+            allowed_groups: this.allowedGroups,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', queryId);
         
         if (updateError) throw updateError;
